@@ -1,9 +1,8 @@
 # 사용자 설정 (개인 경로/API 키 포함)
 config.*
-config.example.yaml
+!config.example.yaml
 
 # 런타임 생성 파일
-.code_tracker_cache/
 .code_tracker_cache/
 .tracker_state.json
 change_logs/
