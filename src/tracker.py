@@ -32,8 +32,12 @@ class CodeTracker:
 
         self.observer = Observer()
         self.handler = CodeChangeHandler(self.config)
+
+        self.handler._scan_done.wait()
+
         self.observer.schedule(self.handler, str(path), recursive=True)
         self.observer.start()
+        print(f"👁️  파일 감시 시작 | Ctrl+C 로 종료\n")
 
         try:
             while True:

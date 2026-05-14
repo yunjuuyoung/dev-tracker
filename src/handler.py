@@ -43,7 +43,7 @@ class CodeChangeHandler(FileSystemEventHandler):
         self.processing_files = set()
         self.change_history = []
         self.session_start_time = datetime.now()
-        self.initial_scan_complete = False
+        self._scan_done = threading.Event()
 
         tag = f"[{self.project_name}]"
         print(f"\n{tag} ✅ 감시 시작: {self.project_path}")
@@ -138,9 +138,6 @@ class CodeChangeHandler(FileSystemEventHandler):
             cache_file = self._get_cache_path(file_path)
 
             if not cache_file.exists():
-                if not self.initial_scan_complete:
-                    print(f"⚠️  초기 스캔 전 파일 감지: {file_path.name}")
-                    print(f"   현재 상태를 원본으로 간주합니다. (최선)")
                 if self.enable_backup:
                     self._backup_file(file_path, current_content)
                 self._update_cache(file_path, current_content)
@@ -287,12 +284,12 @@ class CodeChangeHandler(FileSystemEventHandler):
                         except Exception:
                             continue
 
-            self.initial_scan_complete = True
             print(f"{tag} ✅ 초기 스캔 완료: {scanned_count}개 파일 \n")
+            self._scan_done.set()
 
         except Exception as e:
             print(f"{tag} ⚠️  초기 스캔 오류: {e}")
-            self.initial_scan_complete = True
+            self._scan_done.set()
 
     # ── Diff / AI ──────────────────────────────────────────────────
 
@@ -339,6 +336,8 @@ class CodeChangeHandler(FileSystemEventHandler):
         today = datetime.now().strftime("%Y-%m-%d")
         md_file = self.output_dir / f"changes_{today}.md"
 
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+
         if not md_file.exists():
             with open(md_file, 'w', encoding='utf-8') as f:
                 f.write(f"# 코드 변경 로그 - {today}\n\n")
@@ -380,6 +379,7 @@ class CodeChangeHandler(FileSystemEventHandler):
         session_end_time = datetime.now()
         session_duration = session_end_time - self.session_start_time
 
+        self.output_dir.mkdir(parents=True, exist_ok=True)
         summary_file = self.output_dir / f"session_summary_{self.session_start_time.strftime('%Y%m%d_%H%M%S')}.md"
 
         with open(summary_file, 'w', encoding='utf-8') as f:
