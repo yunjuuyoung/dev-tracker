@@ -1,0 +1,45 @@
+# 사용자 설정 (개인 경로/API 키 포함)
+config.yaml
+
+# 런타임 생성 파일
+.code_tracker_cache/
+.code_tracker_cache/
+.tracker_state.json
+change_logs/
+file_backups/
+projects
+
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# 가상 환경
+env/
+venv/
+.venv/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 실행 스크립트 (예정)
+start.bat
+start.sh
+
+# etc
+explain.md
+_backup_multiproject/*

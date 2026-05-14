@@ -1,0 +1,61 @@
+# 코드 트래커 설정 파일 예시
+# 이 파일을 config.yaml 로 복사한 뒤 경로와 옵션을 수정하세요.
+# python main.py 첫 실행 시 자동으로 config.yaml 이 생성됩니다.
+
+# 감시할 프로젝트 폴더 경로
+project_path: C:/workspace
+
+# 특정 하위 경로만 스캔/감시 (비워두면 전체 프로젝트 대상)
+# 프로젝트 폴더 기준 상대경로
+scan_paths: []
+# scan_paths:
+#   - src/main/java
+#   - src/main/resources
+
+# 프로젝트 경로 변경 시 초기 스캔 캐시 자동 초기화
+rescan_on_path_change: true
+
+# 출력 방식: markdown
+output_type: markdown
+
+# 변경 로그 저장 위치
+output_folder: change_logs
+
+# 원본 파일 백업
+enable_backup: true
+backup_folder: file_backups
+
+# AI 설명 (use_ai: false 면 Diff만 기록)
+use_ai: false
+ai_provider: gemini
+api_key: ''
+gemini_model:
+
+ollama_model: llama3.2
+ollama_url: http://localhost:11434
+
+# 추적할 파일 확장자
+file_extensions:
+  - .java
+  - .html
+  - .css
+  - .js
+  - .jsp
+  - .xml
+
+# 무시할 폴더
+ignore_folders:
+  - node_modules
+  - target
+  - .git
+  - .svn
+  - build
+  - dist
+  - .idea
+  - .metadata
+
+# 최소 변경 라인 수
+min_change_lines: 1
+
+# 종료 시 세션 요약 파일 저장 여부
+save_session_summary: true

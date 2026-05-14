@@ -1,0 +1,19 @@
+# 필수 패키지
+watchdog==5.0.3
+PyYAML==6.0.1
+
+# AI 제공자 (선택사항 - 원하는 경우에만 설치)
+# 설치 방법: pip install google-generativeai
+# 또는: pip install openai
+# 또는: pip install requests (Ollama용)
+
+# Google Gemini (무료)
+google-generativeai>=0.3.0
+
+# OpenAI ChatGPT (유료)
+# openai>=1.0.0
+
+# Ollama (로컬, 무료)
+# requests>=2.31.0
+
+
