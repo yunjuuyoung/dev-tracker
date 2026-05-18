@@ -9,6 +9,7 @@ from datetime import datetime
 from watchdog.events import FileSystemEventHandler
 
 from .ai_client import AIClient
+from .progress import ScanProgressBar
 
 
 class CodeChangeHandler(FileSystemEventHandler):
@@ -257,11 +258,14 @@ class CodeChangeHandler(FileSystemEventHandler):
             if not roots:
                 print(f"{tag} ⚠️  유효한 scan_paths가 없어 전체 프로젝트를 스캔합니다.")
                 roots = [self.project_path]
-            print(f"{tag} 🔍 초기 스캔 시작... ({len(roots)}개 경로)")
         else:
             roots = [self.project_path]
-            print(f"{tag} 🔍 초기 스캔 시작...")
 
+        total = self._count_scannable_files(roots)
+        path_label = f"{len(roots)}개 경로" if scan_paths else "전체 프로젝트"
+        print(f"{tag} 🔍 초기 스캔 시작... ({path_label} / {total}개 파일)")
+
+        progress = ScanProgressBar(total)
         scanned_count = 0
 
         try:
@@ -277,6 +281,8 @@ class CodeChangeHandler(FileSystemEventHandler):
                         if file_path.suffix not in self.config['file_extensions']:
                             continue
 
+                        progress.update(file)
+
                         cache_file = self._get_cache_path(file_path)
                         if cache_file.exists():
                             continue
@@ -289,12 +295,24 @@ class CodeChangeHandler(FileSystemEventHandler):
                         except Exception:
                             continue
 
-            print(f"{tag} ✅ 초기 스캔 완료: {scanned_count}개 파일 \n")
+            elapsed = progress.finish()
+            print(f"{tag} ✅ 초기 스캔 완료: {scanned_count}개 캐시됨 ({elapsed:.1f}초)\n")
             self._scan_done.set()
 
         except Exception as e:
+            progress.finish()
             print(f"{tag} ⚠️  초기 스캔 오류: {e}")
             self._scan_done.set()
+
+    def _count_scannable_files(self, roots: list) -> int:
+        count = 0
+        for root_path in roots:
+            if not root_path.exists():
+                continue
+            for root, dirs, files in os.walk(root_path):
+                dirs[:] = [d for d in dirs if d not in self.config['ignore_folders']]
+                count += sum(1 for f in files if Path(f).suffix in self.config['file_extensions'])
+        return count
 
     # ── Diff / AI ──────────────────────────────────────────────────
 
