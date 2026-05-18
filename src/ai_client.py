@@ -32,7 +32,7 @@ class AIClient:
             if not AI_CLIENTS['gemini']:
                 raise ImportError("google-generativeai가 설치되지 않았습니다. pip install google-generativeai")
             genai.configure(api_key=self.api_key)
-            gemini_model = config.get('gemini_model', 'gemini-1.5-flash')
+            gemini_model = config.get('gemini_model', 'gemini-2.5-flash')
             self.model = genai.GenerativeModel(gemini_model)
 
         elif self.provider == 'chatgpt':
