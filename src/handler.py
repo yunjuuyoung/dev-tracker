@@ -17,7 +17,7 @@ class CodeChangeHandler(FileSystemEventHandler):
     def __init__(self, config):
         self.config = config
         self.project_name = config.get('name', '프로젝트')
-        self.project_path = Path(config['project_path'])
+        self.project_path = Path(config['project_path']).resolve()
 
         # 프로젝트마다 독립된 캐시 디렉토리 (경로 해시로 구분)
         project_hash = hashlib.md5(self.project_path.as_posix().encode()).hexdigest()[:8]
@@ -250,7 +250,13 @@ class CodeChangeHandler(FileSystemEventHandler):
         tag = f"[{self.project_name}]"
         scan_paths = self.config.get('scan_paths', [])
         if scan_paths:
-            roots = [self.project_path / sp for sp in scan_paths]
+            roots = [self.project_path / sp for sp in scan_paths if (self.project_path / sp).exists()]
+            invalid = [sp for sp in scan_paths if not (self.project_path / sp).exists()]
+            for sp in invalid:
+                print(f"{tag} ⚠️  스캔 경로를 찾을 수 없습니다: {self.project_path / sp}")
+            if not roots:
+                print(f"{tag} ⚠️  유효한 scan_paths가 없어 전체 프로젝트를 스캔합니다.")
+                roots = [self.project_path]
             print(f"{tag} 🔍 초기 스캔 시작... ({len(roots)}개 경로)")
         else:
             roots = [self.project_path]
@@ -261,7 +267,6 @@ class CodeChangeHandler(FileSystemEventHandler):
         try:
             for root_path in roots:
                 if not root_path.exists():
-                    print(f"⚠️  스캔 경로를 찾을 수 없습니다: {root_path}")
                     continue
 
                 for root, dirs, files in os.walk(root_path):

@@ -23,6 +23,7 @@ class CodeTracker:
         if not path.exists():
             print(f"❌ 경로를 찾을 수 없습니다: {path}")
             return
+        path = path.resolve()
 
         self._handle_path_change()
 
@@ -35,7 +36,22 @@ class CodeTracker:
 
         self.handler._scan_done.wait()
 
-        self.observer.schedule(self.handler, str(path), recursive=True)
+        scan_paths = self.config.get('scan_paths', [])
+        if scan_paths:
+            scheduled = False
+            for sp in scan_paths:
+                watch_path = path / sp
+                if watch_path.exists():
+                    self.observer.schedule(self.handler, str(watch_path), recursive=True)
+                    scheduled = True
+                else:
+                    print(f"  ⚠️  감시 경로를 찾을 수 없습니다: {watch_path}")
+            if not scheduled:
+                print("  ⚠️  유효한 scan_paths가 없어 전체 프로젝트를 감시합니다.")
+                self.observer.schedule(self.handler, str(path), recursive=True)
+        else:
+            self.observer.schedule(self.handler, str(path), recursive=True)
+
         self.observer.start()
         print(f"👁️  파일 감시 시작 | Ctrl+C 로 종료\n")
 
